@@ -52,9 +52,15 @@ public class BackgroundGeolocationFacade {
     public static final int AUTHORIZATION_AUTHORIZED = 1;
     public static final int AUTHORIZATION_DENIED = 0;
 
-    public static final String[] PERMISSIONS = {
-            Manifest.permission.ACCESS_COARSE_LOCATION,
-            Manifest.permission.ACCESS_FINE_LOCATION
+    public static final String[] PERMISSIONS_OLD = {
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION
+    };
+
+    public static final String[] PERMISSIONS_NEW = {
+        Manifest.permission.ACCESS_COARSE_LOCATION,
+        Manifest.permission.ACCESS_FINE_LOCATION,
+        Manifest.permission.ACTIVITY_RECOGNITION
     };
 
     private boolean mServiceBroadcastReceiverRegistered = false;
@@ -213,9 +219,10 @@ public class BackgroundGeolocationFacade {
 
     public void start() {
         logger.debug("Starting service");
+        String[] p = ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) ? PERMISSIONS_NEW : PERMISSIONS_OLD;
 
         PermissionManager permissionManager = PermissionManager.getInstance(getContext());
-        permissionManager.checkPermissions(Arrays.asList(PERMISSIONS), new PermissionManager.PermissionRequestListener() {
+        permissionManager.checkPermissions(Arrays.asList( p ), new PermissionManager.PermissionRequestListener() {
             @Override
             public void onPermissionGranted() {
                 logger.info("User granted requested permissions");
@@ -414,7 +421,8 @@ public class BackgroundGeolocationFacade {
     }
 
     public boolean hasPermissions() {
-        return hasPermissions(getContext(), PERMISSIONS);
+        String[] p = ( Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q ) ? PERMISSIONS_NEW : PERMISSIONS_OLD;
+        return hasPermissions(getContext(), p);
     }
 
     public boolean locationServicesEnabled() throws PluginException {
